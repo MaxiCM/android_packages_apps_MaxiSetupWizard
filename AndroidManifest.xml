@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2015 Tesla OS
+     Copyright (C) 2015 MaxiCM
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-          package="com.tesla.setupwizard"
+          package="com.maxicm.setupwizard"
           android:versionCode="3"
           android:sharedUserId="android.uid.system">
 
@@ -45,22 +45,22 @@
     <uses-permission android:name="cyanogenmod.permission.HARDWARE_ABSTRACTION_ACCESS" />
     <uses-permission android:name="android.permission.BACKUP" />
     <uses-permission android:name="org.whispersystems.whisperpush.permissions.REGISTER" />
-    <uses-permission android:name="tesla.permission.FINISH_SETUP" />
+    <uses-permission android:name="maxicm.permission.FINISH_SETUP" />
 
     <permission
-        android:name="tesla.permission.PROTECTED_APP"
+        android:name="maxicm.permission.PROTECTED_APP"
         android:protectionLevel="signatureOrSystem" />
 
     <permission
-        android:name="tesla.permission.FINISH_SETUP"
+        android:name="maxicm.permission.FINISH_SETUP"
         android:protectionLevel="signatureOrSystem"
         androidprv:allowViaWhitelist="true" />
 
     <permission android:name="org.whispersystems.whisperpush.permissions.REGISTER"
                 android:protectionLevel="signature" />
 
-    <protected-broadcast android:name="com.tesla.setupwizard.SETUP_FINISHED"
-                         android:permission="tesla.permission.FINISH_SETUP"/>
+    <protected-broadcast android:name="com.maxicm.setupwizard.SETUP_FINISHED"
+                         android:permission="maxicm.permission.FINISH_SETUP"/>
 
     <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="21" />
 
@@ -94,7 +94,7 @@
         <receiver android:name=".setup.FinishSetupReceiver"
                   android:exported="true">
             <intent-filter>
-                <action android:name="com.tesla.setupwizard.ACTION_FINISH_SETUPWIZARD" />
+                <action android:name="com.maxicm.setupwizard.ACTION_FINISH_SETUPWIZARD" />
             </intent-filter>
         </receiver>
     </application>
