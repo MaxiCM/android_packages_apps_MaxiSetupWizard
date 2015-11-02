@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Tesla OS
+ * Copyright (C) 2015 The MaxiCM
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tesla.setupwizard.setup;
+package com.maxicm.setupwizard.setup;
 
 import android.app.ActivityOptions;
 import android.app.Fragment;
@@ -29,9 +29,9 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.NumberPicker;
 
-import com.tesla.setupwizard.R;
-import com.tesla.setupwizard.ui.LocalePicker;
-import com.tesla.setupwizard.ui.SetupPageFragment;
+import com.maxicm.setupwizard.R;
+import com.maxicm.setupwizard.ui.LocalePicker;
+import com.maxicm.setupwizard.ui.SetupPageFragment;
 
 import java.util.Locale;
 

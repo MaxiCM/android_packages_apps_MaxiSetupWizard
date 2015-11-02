@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The CyanogenMod Project
+ * Copyright (C) 2015 The MaxiCM
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tesla.setupwizard.ui;
+package com.maxicm.setupwizard.ui;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -25,9 +25,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.tesla.setupwizard.R;
-import com.tesla.setupwizard.setup.Page;
-import com.tesla.setupwizard.setup.SetupDataCallbacks;
+import com.maxicm.setupwizard.R;
+import com.maxicm.setupwizard.setup.Page;
+import com.maxicm.setupwizard.setup.SetupDataCallbacks;
 
 public abstract class SetupPageFragment extends Fragment {
 

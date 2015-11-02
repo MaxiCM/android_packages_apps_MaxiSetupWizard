@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Tesla OS
+ * Copyright (C) 2015 The MaxiCM
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tesla.setupwizard;
+package com.maxicm.setupwizard;
 
 
 import android.app.Application;
@@ -24,7 +24,7 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.provider.Settings;
 
-import com.tesla.setupwizard.util.SetupWizardUtils;
+import com.maxicm.setupwizard.util.SetupWizardUtils;
 
 public class SetupWizardApp extends Application {
 
@@ -32,7 +32,7 @@ public class SetupWizardApp extends Application {
     // Leave this off for release
     public static final boolean DEBUG = false;
 
-    public static final String ACTION_FINISHED = "com.tesla.setupwizard.SETUP_FINISHED";
+    public static final String ACTION_FINISHED = "com.maxicm.setupwizard.SETUP_FINISHED";
 
     public static final String ACCOUNT_TYPE_GMS = "com.google";
 

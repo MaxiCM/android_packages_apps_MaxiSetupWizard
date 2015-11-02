@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Tesla OS
+ * Copyright (C) 2015 The MaxiCM
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tesla.setupwizard.ui;
+package com.maxicm.setupwizard.ui;
 
 import com.android.internal.R;
 
@@ -144,7 +144,7 @@ public class LocalePicker extends LinearLayout {
      * The resource id for the default layout.
      */
     private static final int DEFAULT_LAYOUT_RESOURCE_ID =
-            com.tesla.setupwizard.R.layout.locale_picker;
+            com.maxicm.setupwizard.R.layout.locale_picker;
 
     /**
      * Constant for unspecified size.
@@ -570,8 +570,8 @@ public class LocalePicker extends LinearLayout {
      */
     public LocalePicker(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        SELECTOR_WHEEL_ITEM_COUNT = context.getResources().getInteger(com.tesla.setupwizard.R.integer.local_picker_items);
-        SELECTOR_MIDDLE_ITEM_INDEX = context.getResources().getInteger(com.tesla.setupwizard.R.integer.local_picker_items)/2;
+        SELECTOR_WHEEL_ITEM_COUNT = context.getResources().getInteger(com.maxicm.setupwizard.R.integer.local_picker_items);
+        SELECTOR_MIDDLE_ITEM_INDEX = context.getResources().getInteger(com.maxicm.setupwizard.R.integer.local_picker_items)/2;
         mSelectorIndices= new int[SELECTOR_WHEEL_ITEM_COUNT];
         // process style attributes
         TypedArray attributesArray = context.obtainStyledAttributes(
@@ -583,7 +583,7 @@ public class LocalePicker extends LinearLayout {
 
         mSolidColor = attributesArray.getColor(R.styleable.NumberPicker_solidColor, 0);
 
-        mSelectionDivider = context.getDrawable(com.tesla.setupwizard.R.drawable.divider);
+        mSelectionDivider = context.getDrawable(com.maxicm.setupwizard.R.drawable.divider);
 
         mSelectionDividerHeight = UNSCALED_DEFAULT_SELECTION_DIVIDER_HEIGHT;
 

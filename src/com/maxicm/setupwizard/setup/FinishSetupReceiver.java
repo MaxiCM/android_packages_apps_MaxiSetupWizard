@@ -1,4 +1,4 @@
-package com.tesla.setupwizard.setup;
+package com.maxicm.setupwizard.setup;
 
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
@@ -6,8 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
 
-import com.tesla.setupwizard.SetupWizardApp;
-import com.tesla.setupwizard.util.SetupWizardUtils;
+import com.maxicm.setupwizard.SetupWizardApp;
+import com.maxicm.setupwizard.util.SetupWizardUtils;
 
 public class FinishSetupReceiver extends BroadcastReceiver {
 

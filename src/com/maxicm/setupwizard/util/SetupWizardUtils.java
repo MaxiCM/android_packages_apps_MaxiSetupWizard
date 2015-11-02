@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The CyanogenMod Project
+ * Copyright (C) 2013 The MaxiCM
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tesla.setupwizard.util;
+package com.maxicm.setupwizard.util;
 
 import android.accounts.AccountManager;
 import android.content.ComponentName;
@@ -32,7 +32,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.tesla.setupwizard.SetupWizardApp;
+import com.maxicm.setupwizard.SetupWizardApp;
 import com.android.internal.widget.LockPatternUtils;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -158,9 +158,9 @@ public class SetupWizardUtils {
 
     public static void disableSetupWizard(Context context) {
         disableComponent(context, context.getPackageName(),
-                "com.tesla.setupwizard.ui.SetupWizardActivity");
+                "com.maxicm.setupwizard.ui.SetupWizardActivity");
         disableComponent(context, context.getPackageName(),
-                "com.tesla.setupwizard.setup.FinishSetupReceiver");
+                "com.maxicm.setupwizard.setup.FinishSetupReceiver");
     }
 
     public static void disableGMSSetupWizard(Context context) {

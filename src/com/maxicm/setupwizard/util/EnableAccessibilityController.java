@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.tesla.setupwizard.util;
+package com.maxicm.setupwizard.util;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.ActivityManager;

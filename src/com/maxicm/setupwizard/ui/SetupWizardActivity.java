@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Tesla OS
+ * Copyright (C) 2015 The MaxiCM
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tesla.setupwizard.ui;
+package com.maxicm.setupwizard.ui;
 
 import android.animation.Animator;
 import android.app.Activity;
@@ -39,13 +39,13 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
-import com.tesla.setupwizard.R;
-import com.tesla.setupwizard.SetupWizardApp;
-import com.tesla.setupwizard.setup.TeslaSetupWizardData;
-import com.tesla.setupwizard.setup.Page;
-import com.tesla.setupwizard.setup.SetupDataCallbacks;
-import com.tesla.setupwizard.util.EnableAccessibilityController;
-import com.tesla.setupwizard.util.SetupWizardUtils;
+import com.maxicm.setupwizard.R;
+import com.maxicm.setupwizard.SetupWizardApp;
+import com.maxicm.setupwizard.setup.MaxiCMSetupWizardData;
+import com.maxicm.setupwizard.setup.Page;
+import com.maxicm.setupwizard.setup.SetupDataCallbacks;
+import com.maxicm.setupwizard.util.EnableAccessibilityController;
+import com.maxicm.setupwizard.util.SetupWizardUtils;
 
 import java.util.ArrayList;
 
@@ -70,7 +70,7 @@ public class SetupWizardActivity extends Activity implements SetupDataCallbacks,
 
     private EnableAccessibilityController mEnableAccessibilityController;
 
-    private TeslaSetupWizardData mSetupData;
+    private MaxiCMSetupWizardData mSetupData;
 
     private final Handler mHandler = new Handler();
 
@@ -99,9 +99,9 @@ public class SetupWizardActivity extends Activity implements SetupDataCallbacks,
         mButtonBar = findViewById(R.id.button_bar);
         mFinishingProgressBar = (ProgressBar)findViewById(R.id.finishing_bar);
         ((SetupWizardApp)getApplicationContext()).disableStatusBar();
-        mSetupData = (TeslaSetupWizardData)getLastNonConfigurationInstance();
+        mSetupData = (MaxiCMSetupWizardData)getLastNonConfigurationInstance();
         if (mSetupData == null) {
-            mSetupData = new TeslaSetupWizardData(getApplicationContext());
+            mSetupData = new MaxiCMSetupWizardData(getApplicationContext());
         }
         mNextButton = (Button) findViewById(R.id.next_button);
         mPrevButton = (Button) findViewById(R.id.prev_button);

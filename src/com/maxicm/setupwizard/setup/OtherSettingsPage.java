@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Tesla OS
+ * Copyright (C) 2015 The MaxiCM
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tesla.setupwizard.setup;
+package com.maxicm.setupwizard.setup;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -36,11 +36,11 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-import com.tesla.setupwizard.R;
-import com.tesla.setupwizard.SetupWizardApp;
-import com.tesla.setupwizard.ui.SetupPageFragment;
-import com.tesla.setupwizard.ui.WebViewDialogFragment;
-import com.tesla.setupwizard.util.SetupWizardUtils;
+import com.maxicm.setupwizard.R;
+import com.maxicm.setupwizard.SetupWizardApp;
+import com.maxicm.setupwizard.ui.SetupPageFragment;
+import com.maxicm.setupwizard.ui.WebViewDialogFragment;
+import com.maxicm.setupwizard.util.SetupWizardUtils;
 
 import java.util.Observable;
 import java.util.Observer;

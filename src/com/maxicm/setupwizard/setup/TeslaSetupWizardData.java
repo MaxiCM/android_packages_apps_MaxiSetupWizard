@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Tesla OS
+ * Copyright (C) 2015 The MaxiCM
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tesla.setupwizard.setup;
+package com.maxicm.setupwizard.setup;
 
 import android.content.Context;
 import android.content.Intent;
@@ -26,19 +26,19 @@ import android.telephony.TelephonyManager;
 
 import android.util.Log;
 import com.android.internal.telephony.TelephonyIntents;
-import com.tesla.setupwizard.util.SetupWizardUtils;
+import com.maxicm.setupwizard.util.SetupWizardUtils;
 
 import java.util.ArrayList;
 
-public class TeslaSetupWizardData extends AbstractSetupData {
+public class MaxiCMSetupWizardData extends AbstractSetupData {
 
-    private static final String TAG = TeslaSetupWizardData.class.getSimpleName();
+    private static final String TAG = MaxiCMSetupWizardData.class.getSimpleName();
 
     private boolean mTimeSet = false;
     private boolean mTimeZoneSet = false;
     private boolean mMobileDataEnabled;
 
-    public TeslaSetupWizardData(Context context) {
+    public MaxiCMSetupWizardData(Context context) {
         super(context);
         mMobileDataEnabled = SetupWizardUtils.isMobileDataEnabled(context);
     }

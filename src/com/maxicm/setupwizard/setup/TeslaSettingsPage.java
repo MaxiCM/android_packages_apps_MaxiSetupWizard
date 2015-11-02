@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Tesla OS
+ * Copyright (C) 2015 The maxicm OS
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tesla.setupwizard.setup;
+package com.maxicm.setupwizard.setup;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -40,23 +40,23 @@ import android.view.WindowManagerGlobal;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-import com.tesla.setupwizard.R;
-import com.tesla.setupwizard.ui.SetupPageFragment;
-import com.tesla.setupwizard.ui.WebViewDialogFragment;
-import com.tesla.setupwizard.util.SetupWizardUtils;
+import com.maxicm.setupwizard.R;
+import com.maxicm.setupwizard.ui.SetupPageFragment;
+import com.maxicm.setupwizard.ui.WebViewDialogFragment;
+import com.maxicm.setupwizard.util.SetupWizardUtils;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import cyanogenmod.hardware.CMHardwareManager;
 
-public class TeslaSettingsPage extends SetupPage {
-    public static final String TAG = "TeslaSettingsPage";
+public class MaxiCMSettingsPage extends SetupPage {
+    public static final String TAG = "MaxiCMSettingsPage";
 
     public static final String KEY_ENABLE_NAV_KEYS = "enable_nav_keys";
     public static final String KEY_APPLY_DEFAULT_THEME = "apply_default_theme";
 
-    public TeslaSettingsPage(Context context, SetupDataCallbacks callbacks) {
+    public MaxiCMSettingsPage(Context context, SetupDataCallbacks callbacks) {
         super(context, callbacks);
     }
 
@@ -67,7 +67,7 @@ public class TeslaSettingsPage extends SetupPage {
             Bundle args = new Bundle();
             args.putString(Page.KEY_PAGE_ARGUMENT, getKey());
             args.putInt(Page.KEY_PAGE_ACTION, action);
-            fragment = new TeslaSettingsFragment();
+            fragment = new MaxiCMSettingsFragment();
             fragment.setArguments(args);
         }
         return fragment;
@@ -155,7 +155,7 @@ public class TeslaSettingsPage extends SetupPage {
         return ThemeUtils.getDefaultThemePackageName(context).equals(ThemeConfig.SYSTEM_DEFAULT);
     }
 
-    public static class TeslaSettingsFragment extends SetupPageFragment {
+    public static class MaxiCMSettingsFragment extends SetupPageFragment {
 
         private View mDefaultThemeRow;
         private View mNavKeysRow;
@@ -227,7 +227,7 @@ public class TeslaSettingsPage extends SetupPage {
 
         @Override
         protected int getLayoutResource() {
-            return R.layout.setup_tesla_services;
+            return R.layout.setup_maxicm_services;
         }
 
         @Override
