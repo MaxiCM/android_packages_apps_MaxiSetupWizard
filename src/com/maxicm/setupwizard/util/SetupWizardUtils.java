@@ -243,8 +243,6 @@ public class SetupWizardUtils {
         FingerprintManager fingerprintManager = (FingerprintManager)
                 context.getSystemService(Context.FINGERPRINT_SERVICE);
         return fingerprintManager.isHardwareDetected();
-<<<<<<< HEAD:src/com/maxicm/setupwizard/util/SetupWizardUtils.java
-=======
     }
 
     public static String getDefaultThemePackageName(Context context) {
@@ -263,7 +261,6 @@ public class SetupWizardUtils {
         }
 
         return SYSTEM_DEFAULT;
->>>>>>> 2111e671f4e73c0ad1507be45fb84126c1923bfd:src/com/tesla/setupwizard/util/SetupWizardUtils.java
     }
 
     public static final ComponentName mTvwifisettingsActivity =
