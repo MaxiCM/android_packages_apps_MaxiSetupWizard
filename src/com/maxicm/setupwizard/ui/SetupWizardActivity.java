@@ -19,17 +19,19 @@ package com.maxicm.setupwizard.ui;
 import android.animation.Animator;
 import android.app.Activity;
 import android.app.WallpaperManager;
-import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
-/*import android.content.res.ThemeManager;*/
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -42,10 +44,13 @@ import android.widget.ProgressBar;
 import com.maxicm.setupwizard.R;
 import com.maxicm.setupwizard.SetupWizardApp;
 import com.maxicm.setupwizard.setup.MaxiCMSetupWizardData;
+import com.tesla.setupwizard.setup.GmsAccountPage;
 import com.maxicm.setupwizard.setup.Page;
 import com.maxicm.setupwizard.setup.SetupDataCallbacks;
 import com.maxicm.setupwizard.util.EnableAccessibilityController;
 import com.maxicm.setupwizard.util.SetupWizardUtils;
+
+import cyanogenmod.themes.ThemeManager;
 
 import java.util.ArrayList;
 
@@ -53,6 +58,7 @@ import java.util.ArrayList;
 public class SetupWizardActivity extends Activity implements SetupDataCallbacks {
 
     private static final String TAG = SetupWizardActivity.class.getSimpleName();
+    private static final String KEY_LAST_PAGE_TAG = "last_page_tag";
 
     private static final int UI_FLAGS = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
             | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -79,6 +85,10 @@ public class SetupWizardActivity extends Activity implements SetupDataCallbacks 
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final boolean isOwner = SetupWizardUtils.isOwner();
+        if (!isOwner) {
+            finish();
+        }
         final View decorView = getWindow().getDecorView();
         decorView.setSystemUiVisibility(UI_FLAGS);
         decorView.setOnSystemUiVisibilityChangeListener(
@@ -130,6 +140,27 @@ public class SetupWizardActivity extends Activity implements SetupDataCallbacks 
         if (savedInstanceState != null && savedInstanceState.containsKey("data")) {
             mSetupData.load(savedInstanceState.getBundle("data"));
         }
+
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (sharedPreferences.contains(KEY_LAST_PAGE_TAG)) {
+            final String lastPage = sharedPreferences.getString(KEY_LAST_PAGE_TAG,
+                    mSetupData.getCurrentPage().getKey());
+            final boolean backupEnabled = (Settings.Secure.getInt(getContentResolver(),
+                    Settings.Secure.BACKUP_AUTO_RESTORE, 0) == 1) ||
+                    (Settings.Secure.getInt(getContentResolver(),
+                            Settings.Secure.BACKUP_ENABLED, 0) == 1);
+            if (TextUtils.equals(lastPage, GmsAccountPage.TAG) && backupEnabled) {
+                // We probably already restored, skip ahead!
+                mSetupData.setCurrentPage(mSetupData.getNextPage(lastPage).getKey());
+            } else {
+                // else just restore
+                mSetupData.setCurrentPage(sharedPreferences.getString(KEY_LAST_PAGE_TAG,
+                        mSetupData.getCurrentPage().getKey()));
+            }
+            Page page = mSetupData.getCurrentPage();
+            page.doLoadAction(getFragmentManager(), Page.ACTION_NEXT);
+        }
+
         mEnableAccessibilityController =
                 EnableAccessibilityController.getInstance(getApplicationContext());
         mRootView.setOnTouchListener(new View.OnTouchListener() {
@@ -148,6 +179,9 @@ public class SetupWizardActivity extends Activity implements SetupDataCallbacks 
         final View decorView = getWindow().getDecorView();
         decorView.setSystemUiVisibility(UI_FLAGS);
         super.onResume();
+        if (isFinishing()) {
+            return;
+        }
         if (mSetupData.isFinished()) {
             mHandler.postDelayed(new Runnable() {
                 @Override
@@ -165,15 +199,21 @@ public class SetupWizardActivity extends Activity implements SetupDataCallbacks 
     @Override
     protected void onPause() {
         super.onPause();
-        mSetupData.onPause();
+        if (mSetupData != null) {
+            mSetupData.onPause();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mSetupData.onDestroy();
-        mSetupData.unregisterListener(this);
-        unregisterReceiver(mSetupData);
+        if (mSetupData != null) {
+            final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            prefs.edit().putString(KEY_LAST_PAGE_TAG, mSetupData.getCurrentPage().getKey()).apply();
+            mSetupData.onDestroy();
+            mSetupData.unregisterListener(this);
+            unregisterReceiver(mSetupData);
+        }
     }
 
     @Override
@@ -207,6 +247,14 @@ public class SetupWizardActivity extends Activity implements SetupDataCallbacks 
         Page page = mSetupData.getCurrentPage();
         if (!isFinishing()) {
             page.doLoadAction(getFragmentManager(), Page.ACTION_PREVIOUS);
+        }
+    }
+
+    @Override
+    public void setCurrentPage(String key) {
+        Page page = mSetupData.getCurrentPage();
+        if (!isFinishing()) {
+            page.doLoadAction(getFragmentManager(), Page.ACTION_NEXT);
         }
     }
 
@@ -297,8 +345,8 @@ public class SetupWizardActivity extends Activity implements SetupDataCallbacks 
         mFinishingProgressBar.setVisibility(View.VISIBLE);
         mFinishingProgressBar.setIndeterminate(true);
         mFinishingProgressBar.startAnimation(fadeIn);
-        /*final ThemeManager tm = (ThemeManager) getSystemService(Context.THEME_SERVICE);
-        tm.addClient(this);*/
+        final ThemeManager tm = ThemeManager.getInstance(this);
+        tm.addClient(this);
         mSetupData.finishPages();
     }
 
@@ -410,9 +458,8 @@ public class SetupWizardActivity extends Activity implements SetupDataCallbacks 
                 if (mEnableAccessibilityController != null) {
                     mEnableAccessibilityController.onDestroy();
                 }
-                /*final ThemeManager tm =
-                        (ThemeManager) SetupWizardActivity.this.getSystemService(THEME_SERVICE);
-                tm.removeClient(SetupWizardActivity.this);*/
+                final ThemeManager tm = ThemeManager.getInstance(SetupWizardActivity.this);
+                tm.removeClient(SetupWizardActivity.this);
                 Intent intent = new Intent(Intent.ACTION_MAIN);
                 intent.addCategory(Intent.CATEGORY_HOME);
                 startActivity(intent);
@@ -421,10 +468,35 @@ public class SetupWizardActivity extends Activity implements SetupDataCallbacks 
                 wallpaperManager.forgetLoadedWallpaper();
             }
         });
-        for (Runnable runnable : mFinishRunnables) {
-            runnable.run();
+        new FinishTask(this, mFinishRunnables).execute();
+    }
+
+    private static class FinishTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final SetupWizardActivity mActivity;
+        private final ArrayList<Runnable> mFinishRunnables;
+
+        public FinishTask(SetupWizardActivity activity,
+                ArrayList<Runnable> finishRunnables) {
+            mActivity = activity;
+            mFinishRunnables = finishRunnables;
         }
-        finish();
-        SetupWizardUtils.disableSetupWizard(SetupWizardActivity.this);
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            for (Runnable runnable : mFinishRunnables) {
+                runnable.run();
+            }
+            SetupWizardUtils.disableSetupWizard(mActivity);
+            return Boolean.TRUE;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            mActivity.startActivity(intent);
+            mActivity.finish();
+        }
     }
 }

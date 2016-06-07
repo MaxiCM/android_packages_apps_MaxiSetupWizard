@@ -20,9 +20,8 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.SharedPreferences;
-/*import android.content.pm.ThemeUtils;
 import android.content.res.ThemeConfig;
-import android.content.res.ThemeManager;*/
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
@@ -42,21 +41,18 @@ import android.widget.TextView;
 
 import com.maxicm.setupwizard.R;
 import com.maxicm.setupwizard.ui.SetupPageFragment;
-import com.maxicm.setupwizard.ui.WebViewDialogFragment;
 import com.maxicm.setupwizard.util.SetupWizardUtils;
 
 import cyanogenmod.providers.CMSettings;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-
 import cyanogenmod.hardware.CMHardwareManager;
+import cyanogenmod.providers.CMSettings;
+import cyanogenmod.themes.ThemeManager;
 
 public class MaxiCMSettingsPage extends SetupPage {
     public static final String TAG = "MaxiCMSettingsPage";
-
     public static final String KEY_ENABLE_NAV_KEYS = "enable_nav_keys";
     public static final String KEY_APPLY_DEFAULT_THEME = "apply_default_theme";
+    public static final String KEY_BUTTON_BACKLIGHT = "pre_navbar_button_backlight";
 
     public MaxiCMSettingsPage(Context context, SetupDataCallbacks callbacks) {
         super(context, callbacks);
@@ -87,34 +83,23 @@ public class MaxiCMSettingsPage extends SetupPage {
 
     private static void writeDisableNavkeysOption(Context context, boolean enabled) {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        /*final int defaultBrightness = context.getResources().getInteger(
-                com.android.internal.R.integer.config_buttonBrightnessSettingDefault);*/
-
-        /*Settings.Secure.putInt(context.getContentResolver(),
-                Settings.Secure.DEV_FORCE_SHOW_NAVBAR, enabled ? 1 : 0);
-                final CMHardwareManager hardware = CMHardwareManager.getInstance(context);
-                hardware.set(CMHardwareManager.FEATURE_KEY_DISABLE, enabled);*/
+        CMSettings.Secure.putInt(context.getContentResolver(),
+                CMSettings.Secure.DEV_FORCE_SHOW_NAVBAR, enabled ? 1 : 0);
+        CMHardwareManager hardware = CMHardwareManager.getInstance(context);
+        hardware.set(CMHardwareManager.FEATURE_KEY_DISABLE, enabled);
 
         /* Save/restore button timeouts to disable them in softkey mode */
-        SharedPreferences.Editor editor = prefs.edit();
-
         if (enabled) {
-            int currentBrightness = CMSettings.Secure.getInt(context.getContentResolver(),
-                    CMSettings.Secure.BUTTON_BRIGHTNESS, 100);
-            if (!prefs.contains("pre_navbar_button_backlight")) {
-                editor.putInt("pre_navbar_button_backlight", currentBrightness);
-            }
             CMSettings.Secure.putInt(context.getContentResolver(),
                     CMSettings.Secure.BUTTON_BRIGHTNESS, 0);
         } else {
-            int oldBright = prefs.getInt("pre_navbar_button_backlight", -1);
-            if (oldBright != -1) {
-                CMSettings.Secure.putInt(context.getContentResolver(),
-                        CMSettings.Secure.BUTTON_BRIGHTNESS, oldBright);
-                editor.remove("pre_navbar_button_backlight");
-            }
+            int currentBrightness = CMSettings.Secure.getInt(context.getContentResolver(),
+                    CMSettings.Secure.BUTTON_BRIGHTNESS, 100);
+            int oldBright = prefs.getInt(KEY_BUTTON_BACKLIGHT,
+                    currentBrightness);
+            CMSettings.Secure.putInt(context.getContentResolver(),
+                    CMSettings.Secure.BUTTON_BRIGHTNESS, oldBright);
         }
-        editor.commit();
     }
 
     @Override
@@ -122,8 +107,8 @@ public class MaxiCMSettingsPage extends SetupPage {
         getCallbacks().addFinishRunnable(new Runnable() {
             @Override
             public void run() {
-                if (getData().containsKey(KEY_ENABLE_NAV_KEYS)) {
-                    writeDisableNavkeysOption(mContext, getData().getBoolean(KEY_ENABLE_NAV_KEYS));
+                if (getData().containsKey(DISABLE_NAV_KEYS)) {
+                    writeDisableNavkeysOption(mContext, getData().getBoolean(DISABLE_NAV_KEYS));
                 }
             }
         });
@@ -131,11 +116,12 @@ public class MaxiCMSettingsPage extends SetupPage {
     }
 
     private void handleDefaultThemeSetup() {
-        /*Bundle privacyData = getData();
-        if (!ThemeUtils.getDefaultThemePackageName(mContext).equals(ThemeConfig.SYSTEM_DEFAULT) &&
-                privacyData != null && privacyData.getBoolean(KEY_APPLY_DEFAULT_THEME)) {
+        Bundle privacyData = getData();
+        if (!SetupWizardUtils.getDefaultThemePackageName(mContext).equals(
+                ThemeConfig.SYSTEM_DEFAULT) && privacyData != null &&
+                privacyData.getBoolean(KEY_APPLY_DEFAULT_THEME)) {
             Log.i(TAG, "Applying default theme");
-            final ThemeManager tm = (ThemeManager) mContext.getSystemService(Context.THEME_SERVICE);
+            final ThemeManager tm = ThemeManager.getInstance(mContext);
             tm.applyDefaultTheme();
 
         } else {*/
@@ -153,9 +139,10 @@ public class MaxiCMSettingsPage extends SetupPage {
         return hardware.get(CMHardwareManager.FEATURE_KEY_DISABLE);
       }
 
-    /*private static boolean hideThemeSwitch(Context context) {
-        return ThemeUtils.getDefaultThemePackageName(context).equals(ThemeConfig.SYSTEM_DEFAULT);
-    }*/
+      private static boolean hideThemeSwitch(Context context) {
+          return SetupWizardUtils.getDefaultThemePackageName(context)
+                                 .equals(ThemeConfig.SYSTEM_DEFAULT);
+      }
 
     public static class MaxiCMSettingsFragment extends SetupPageFragment {
 
@@ -181,7 +168,7 @@ public class MaxiCMSettingsPage extends SetupPage {
             public void onClick(View view) {
                 boolean checked = !mNavKeys.isChecked();
                 mNavKeys.setChecked(checked);
-                mPage.getData().putBoolean(KEY_ENABLE_NAV_KEYS, checked);
+                mPage.getData().putBoolean(DISABLE_NAV_KEYS, checked);
             }
         };
 
@@ -257,13 +244,13 @@ public class MaxiCMSettingsPage extends SetupPage {
         /*private void updateDisableNavkeysOption() {
             if (!mHideNavKeysRow) {
                 final Bundle myPageBundle = mPage.getData();
-                boolean enabled = Settings.Secure.getInt(getActivity().getContentResolver(),
-                        Settings.Secure.DEV_FORCE_SHOW_NAVBAR, 0) != 0;
-                boolean checked = myPageBundle.containsKey(KEY_ENABLE_NAV_KEYS) ?
-                        myPageBundle.getBoolean(KEY_ENABLE_NAV_KEYS) :
+                boolean enabled = CMSettings.Secure.getInt(getActivity().getContentResolver(),
+                        CMSettings.Secure.DEV_FORCE_SHOW_NAVBAR, 0) != 0;
+                boolean checked = myPageBundle.containsKey(DISABLE_NAV_KEYS) ?
+                        myPageBundle.getBoolean(DISABLE_NAV_KEYS) :
                         enabled;
                 mNavKeys.setChecked(checked);
-                myPageBundle.putBoolean(KEY_ENABLE_NAV_KEYS, checked);
+                myPageBundle.putBoolean(DISABLE_NAV_KEYS, checked);
             }
         }*/
 

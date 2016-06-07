@@ -38,7 +38,7 @@ public class SetupWizardApp extends Application {
 
     public static final String ACTION_SETUP_WIFI = "com.android.net.wifi.SETUP_WIFI_NETWORK";
 
-    public static final String ACTION_SETUP_FINGERPRINT = "com.android.settings.SETUP_FINGERPRINT";
+    public static final String ACTION_SETUP_FINGERPRINT = "android.settings.FINGERPRINT_SETUP";
 
     public static final String EXTRA_FIRST_RUN = "firstRun";
     public static final String EXTRA_ALLOW_SKIP = "allowSkip";
@@ -50,6 +50,9 @@ public class SetupWizardApp extends Application {
 
     public static final String EXTRA_TITLE = "title";
     public static final String EXTRA_DETAILS = "details";
+    public static final String EXTRA_FRAGMENT = "fragment";
+    public static final String EXTRA_ACTION_ID = "actionId";
+    public static final String EXTRA_SUPRESS_D2D_SETUP = "suppress_device_to_device_setup";
 
     public static final String KEY_DETECT_CAPTIVE_PORTAL = "captive_portal_detection_enabled";
 
@@ -93,14 +96,20 @@ public class SetupWizardApp extends Application {
             if (!isOwner
                     || Settings.Secure.getInt(getContentResolver(),
                     Settings.Secure.USER_SETUP_COMPLETE) == 1) {
-                Settings.Global.putInt(getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 1);
-                Settings.Secure.putInt(getContentResolver(),
-                        Settings.Secure.USER_SETUP_COMPLETE, 1);
-                SetupWizardUtils.disableGMSSetupWizard(this);
-                SetupWizardUtils.disableSetupWizard(this);
-                if (!isOwner) {
-                    disableThemeComponentsForSecondaryUser();
-                }
+                Thread t = new Thread(){
+                    @Override
+                    public void run() {
+                        Settings.Global.putInt(getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 1);
+                        Settings.Secure.putInt(getContentResolver(),
+                                Settings.Secure.USER_SETUP_COMPLETE, 1);
+                        SetupWizardUtils.disableGMSSetupWizard(SetupWizardApp.this);
+                        SetupWizardUtils.disableSetupWizard(SetupWizardApp.this);
+                        if (!isOwner) {
+                            disableThemeComponentsForSecondaryUser();
+                        }
+                    }
+                };
+                t.run();
             }  else {
                 disableCaptivePortalDetection();
             }

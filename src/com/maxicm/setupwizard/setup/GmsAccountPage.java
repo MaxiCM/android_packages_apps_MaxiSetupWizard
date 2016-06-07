@@ -25,13 +25,12 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.ContentQueryMap;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.service.persistentdata.PersistentDataBlockManager;
 import android.util.Log;
 
 import com.maxicm.setupwizard.R;
@@ -40,43 +39,31 @@ import com.maxicm.setupwizard.ui.LoadingFragment;
 import com.maxicm.setupwizard.util.SetupWizardUtils;
 
 import java.io.IOException;
-import java.util.Observable;
-import java.util.Observer;
 
 public class GmsAccountPage extends SetupPage {
 
     public static final String TAG = "GmsAccountPage";
 
     public static final String ACTION_RESTORE = "com.google.android.setupwizard.RESTORE";
+    public static final String ACTION_PROGRESS = "com.google.android.setupwizard.PROGRESS";
+    public static final String RESTORE_ACTION_ID = "mfm_restore_start";
+    public static final String RESTORE_CHECK_ID = "restore_check";
+    public static final String FRAGMENT_START_RESTORE =
+            "com.google.android.setupwizard.account.StartRestoreFragment";
+    public static final String FRAGMENT_CHECK_RESTORE =
+            "com.google.android.setupwizard.account.CheckRestoreTokenFragment";
+
+    public static final String EXTRA_AUTH_ACCOUNT = "authAccount";
+    public static final String EXTRA_RESTORE_ACCOUNT = "restoreAccount";
+    public static final String EXTRA_RESTORE_TOKEN = "restoreToken";
+
     private static final String RESTORE_WIZARD_SCRIPT =
             "android.resource://com.google.android.setupwizard/xml/wizard_script";
-
-    private ContentQueryMap mContentQueryMap;
-    private Observer mSettingsObserver;
-
-    private boolean mBackupEnabled = false;
 
     private Fragment mFragment;
 
     public GmsAccountPage(final Context context, SetupDataCallbacks callbacks) {
         super(context, callbacks);
-        final ContentResolver res = context.getContentResolver();
-        mBackupEnabled = Settings.Secure.getInt(res,
-                Settings.Secure.BACKUP_ENABLED, 0) == 1;
-        mSettingsObserver = new Observer() {
-            public void update(Observable o, Object arg) {
-                mBackupEnabled = (Settings.Secure.getInt(res,
-                        Settings.Secure.BACKUP_AUTO_RESTORE, 0) == 1) ||
-                        (Settings.Secure.getInt(res,
-                                Settings.Secure.BACKUP_ENABLED, 0) == 1);
-            }
-        };
-        //Cursor settingsCursor = res.query(Settings.Secure.CONTENT_URI, null,
-        //        "(" + Settings.System.NAME + "=? OR " + Settings.System.NAME + "=?)",
-        //        new String[]{Settings.Secure.BACKUP_AUTO_RESTORE, Settings.Secure.BACKUP_ENABLED},
-        //        null);
-        //mContentQueryMap = new ContentQueryMap(settingsCursor, Settings.System.NAME, true, null);
-        //mContentQueryMap.addObserver(mSettingsObserver);
     }
 
     @Override
@@ -119,46 +106,67 @@ public class GmsAccountPage extends SetupPage {
 
     @Override
     public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == SetupWizardApp.REQUEST_CODE_SETUP_GMS) {
-            if (!mBackupEnabled && SetupWizardUtils.isOwner() && resultCode == Activity.RESULT_OK) {
-                launchGmsRestorePage();
+        if (requestCode == SetupWizardApp.REQUEST_CODE_SETUP_GMS && data != null) {
+            if (SetupWizardUtils.isOwner() && resultCode == Activity.RESULT_OK) {
+
+                // If we don't have a restore token and a restore account, then we need to
+                // prompt with the restore picker from googles setup wizard so the user
+                // can select what device they would like to restore from. Otherwise,
+                // we're coming from a Tap&Go scenario and we should just restore.
+                boolean restorePicker = !data.hasExtra(EXTRA_RESTORE_TOKEN)
+                        && !data.hasExtra(EXTRA_RESTORE_ACCOUNT) &&
+                        data.hasExtra(EXTRA_AUTH_ACCOUNT);
+                launchGmsRestorePage(restorePicker);
             } else {
                 handleResult(resultCode);
             }
-        } else if (requestCode == SetupWizardApp.REQUEST_CODE_RESTORE_GMS) {
+        } else {
+            if (requestCode == SetupWizardApp.REQUEST_CODE_RESTORE_GMS) {
+                setHidden(true);
+            }
             handleResult(resultCode);
-            setHidden(true);
         }
         return true;
     }
 
     @Override
     public void onFinishSetup() {
-        try {
-            if (mContentQueryMap != null) {
-                mContentQueryMap.close();
-            }
-        } catch (Exception e) {
-            Log.wtf(TAG, e.toString());
-        }
+
     }
 
     private void handleResult(int resultCode) {
         if (resultCode == Activity.RESULT_CANCELED) {
             getCallbacks().onPreviousPage();
         }  else {
+            if (resultCode == Activity.RESULT_OK) {
+                getCallbacks().onNextPage();
+            } else {
+                if (canSkip()) {
+                    getCallbacks().onNextPage();
+                } else {
+                    getCallbacks().onPreviousPage();
+                }
+            }
             if (SetupWizardUtils.accountExists(mContext, SetupWizardApp.ACCOUNT_TYPE_GMS)) {
                 setHidden(true);
             }
-            getCallbacks().onNextPage();
         }
     }
 
-    private void launchGmsRestorePage() {
+    private void launchGmsRestorePage(boolean restorePicker) {
         try {
             // GMS can disable this after logging in sometimes
             if (SetupWizardUtils.enableGMSSetupWizard(mContext)) {
-                Intent intent = new Intent(ACTION_RESTORE);
+                Intent intent = new Intent(ACTION_PROGRESS);
+                if (!restorePicker) {
+                    intent.setAction(ACTION_PROGRESS);
+                    intent.putExtra(SetupWizardApp.EXTRA_FRAGMENT, FRAGMENT_START_RESTORE);
+                    intent.putExtra(SetupWizardApp.EXTRA_ACTION_ID, RESTORE_ACTION_ID);
+                } else {
+                    intent.setAction(ACTION_PROGRESS);
+                    intent.putExtra(SetupWizardApp.EXTRA_ACTION_ID, RESTORE_CHECK_ID);
+                    intent.putExtra(SetupWizardApp.EXTRA_FRAGMENT, FRAGMENT_CHECK_RESTORE);
+                }
                 intent.putExtra(SetupWizardApp.EXTRA_ALLOW_SKIP, true);
                 intent.putExtra(SetupWizardApp.EXTRA_USE_IMMERSIVE, true);
                 intent.putExtra(SetupWizardApp.EXTRA_FIRST_RUN, true);
@@ -179,8 +187,16 @@ public class GmsAccountPage extends SetupPage {
             e.printStackTrace();
             // XXX: In open source, we don't know what gms version a user has.
             // Bail if the restore activity is not found.
+            getCallbacks().onNextPage();
         }
-        getCallbacks().onNextPage();
+    }
+
+    public boolean canSkip() {
+        final PersistentDataBlockManager pdbManager = (PersistentDataBlockManager)
+                mContext.getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
+        return pdbManager == null
+                || pdbManager.getDataBlockSize() == 0
+                || pdbManager.getOemUnlockEnabled();
     }
 
     private void launchGmsAccountSetup() {
@@ -188,6 +204,9 @@ public class GmsAccountPage extends SetupPage {
         bundle.putBoolean(SetupWizardApp.EXTRA_FIRST_RUN, true);
         bundle.putBoolean(SetupWizardApp.EXTRA_ALLOW_SKIP, true);
         bundle.putBoolean(SetupWizardApp.EXTRA_USE_IMMERSIVE, true);
+        bundle.putBoolean(SetupWizardApp.EXTRA_SUPRESS_D2D_SETUP, !mContext.getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_NFC));
+
         AccountManager
                 .get(mContext).addAccount(SetupWizardApp.ACCOUNT_TYPE_GMS, null, null,
                 bundle, null, new AccountManagerCallback<Bundle>() {
@@ -214,7 +233,11 @@ public class GmsAccountPage extends SetupPage {
                         } finally {
                             if (error && getCallbacks().
                                     isCurrentPage(GmsAccountPage.this)) {
-                                getCallbacks().onNextPage();
+                                if (canSkip()) {
+                                    getCallbacks().onNextPage();
+                                } else {
+                                    getCallbacks().onPreviousPage();
+                                }
                             }
                         }
                     }

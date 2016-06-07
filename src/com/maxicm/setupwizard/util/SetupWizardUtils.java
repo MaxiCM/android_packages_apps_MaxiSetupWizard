@@ -31,6 +31,7 @@ import android.os.UserManager;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 /*import com.android.internal.os.IKillSwitchService;*/
@@ -38,6 +39,9 @@ import android.util.Log;
 import com.maxicm.setupwizard.SetupWizardApp;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import cyanogenmod.providers.CMSettings;
+
+import static android.content.res.ThemeConfig.SYSTEM_DEFAULT;
 
 public class SetupWizardUtils {
 
@@ -209,7 +213,7 @@ public class SetupWizardUtils {
 
     private static void disableComponent(Context context, ComponentName component) {
         context.getPackageManager().setComponentEnabledSetting(component,
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
     }
 
     private static void enableComponentArray(Context context, ComponentInfo[] components) {
@@ -239,6 +243,27 @@ public class SetupWizardUtils {
         FingerprintManager fingerprintManager = (FingerprintManager)
                 context.getSystemService(Context.FINGERPRINT_SERVICE);
         return fingerprintManager.isHardwareDetected();
+<<<<<<< HEAD:src/com/maxicm/setupwizard/util/SetupWizardUtils.java
+=======
+    }
+
+    public static String getDefaultThemePackageName(Context context) {
+        final String defaultThemePkg = CMSettings.Secure.getString(context.getContentResolver(),
+                CMSettings.Secure.DEFAULT_THEME_PACKAGE);
+        if (!TextUtils.isEmpty(defaultThemePkg)) {
+            PackageManager pm = context.getPackageManager();
+            try {
+                if (pm.getPackageInfo(defaultThemePkg, 0) != null) {
+                    return defaultThemePkg;
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                // doesn't exist so system will be default
+                Log.w(TAG, "Default theme " + defaultThemePkg + " not found");
+            }
+        }
+
+        return SYSTEM_DEFAULT;
+>>>>>>> 2111e671f4e73c0ad1507be45fb84126c1923bfd:src/com/tesla/setupwizard/util/SetupWizardUtils.java
     }
 
     public static final ComponentName mTvwifisettingsActivity =
